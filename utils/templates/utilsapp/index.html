@@ -21,6 +21,12 @@
             <button type='submit'>Отправить</button>
         </form>
     </div>
+    <div class='container'>
+      {% for file in file_list %}
+        <a href='{{file.file.url}}'>{{file.name}}</a>
+        </br>
+      {% endfor %}
+    </div>
 
     <!-- Optional JavaScript; choose one of the two! -->
 

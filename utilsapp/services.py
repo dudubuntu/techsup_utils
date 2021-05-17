@@ -1,6 +1,21 @@
 import csv
 import json
 from io import StringIO
+import datetime
+import shutil
+
+from django.core.files.uploadedfile import InMemoryUploadedFile
+from django.conf import settings
+from django.core import files
+
+from utilsapp.models import File
+
+
+def handle_uploaded_file(fh, name:str):
+    fh_name = name if '.csv' in name else f'{name}.csv'
+    with open(f"{settings.MEDIA_ROOT / fh_name}", 'wb+') as destination:
+        for chunk in fh.chunks():
+            destination.write(chunk)
 
 
 def clear_files():
@@ -12,7 +27,7 @@ def clear_db():
 
 
 class CheckCsv():
-    def check_neteller(self, neteller_file_name, db_file_name, is_deposit=True):
+    def check_neteller(self, psp_file_name, db_file_name, is_deposit=True):
         """
         return File objects
 
@@ -20,10 +35,14 @@ class CheckCsv():
         is_deposit=False   >   check payouts
         """
 
-        check_type = is_deposit
+        # if not (isinstance(neteller_fh, InMemoryUploadedFile) and isinstance(db_fh, InMemoryUploadedFile) and isinstance(is_deposit, bool)):
+        #     raise TypeError('Неверные типы переданных файлов!')
+
 
         ids = []
-        with open(neteller_file_name, newline='') as fh:
+        
+
+        with open(settings.MEDIA_ROOT / psp_file_name, newline='') as fh:
             spamreader = csv.reader(fh)
             for row in spamreader:
                 try:
@@ -33,14 +52,17 @@ class CheckCsv():
                 except (ValueError, AttributeError, IndexError):
                     print(row)
 
+        if len(ids) == 0:
+            print('Неверный файл')   #TODO добавить нормальное отображение ошибок
+            return None
 
-        with open(db_file_name, newline='') as fh:
+
+        with open(settings.MEDIA_ROOT / db_file_name, newline='') as fh:
             spamreader = csv.reader(fh)
-            
-            fh = StringIO()
+            self.final_fh = StringIO()
             counter = 0
             try:
-                spamwriter = csv.writer(fh, dialect='excel')
+                spamwriter = csv.writer(self.final_fh, dialect='excel')
                 for row in spamreader:
                     if str(row[0]) in ids:
                         if is_deposit:
@@ -48,11 +70,24 @@ class CheckCsv():
                         elif not is_deposit:
                             spamwriter.writerow([row[0]])
                         counter += 1
-            except IOError:
-                pass            #TODO добавить отображение ошибки
+            except IOError as exc:
+                print(exc)  #TODO добавить отображение ошибки
             else:
                 if counter == 0:
                     #нет расхождений статусов
-                    return None
+                    print('нет разхождения статусов')
                 else:
-                    return fh
+                    pass
+
+        self.name = f'neteller{str(datetime.datetime.now().timestamp())}.csv'
+        fh_name = settings.MEDIA_ROOT / self.name
+        with open(settings.MEDIA_ROOT / self.name, 'w') as fh:
+            self.final_fh.seek(0)
+            shutil.copyfileobj(self.final_fh, fh)
+
+
+    def insert_file(self):
+        with open(settings.MEDIA_ROOT / self.name, 'rb+') as fh:
+            dj_file = files.File(fh, name=self.name)
+            fh = File.objects.create(name=self.name, created=datetime.datetime.now(), file=dj_file)
+        return fh
