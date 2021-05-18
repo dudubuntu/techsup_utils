@@ -3,4 +3,6 @@ __pycache__
 .vscode
 db.sqlite3
 migrations/
-utils/media
+utils/media/*
+*.DS_Store*
+celerybeat-schedule.db
