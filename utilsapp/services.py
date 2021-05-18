@@ -3,6 +3,7 @@ import json
 from io import StringIO
 import datetime
 import shutil
+import os
 
 from django.core.files.uploadedfile import InMemoryUploadedFile
 from django.conf import settings
@@ -90,4 +91,5 @@ class CheckCsv():
         with open(settings.MEDIA_ROOT / self.name, 'rb+') as fh:
             dj_file = files.File(fh, name=self.name)
             fh = File.objects.create(name=self.name, created=datetime.datetime.now(), file=dj_file)
+        os.remove(settings.MEDIA_ROOT / self.name)
         return fh
