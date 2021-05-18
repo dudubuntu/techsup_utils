@@ -13,19 +13,53 @@
   <body>
     
     <div class='container'>
-        <form method='post' action='{% url "utilsapp:index" %}' enctype="multipart/form-data">
-            {% csrf_token %}
+      <div class='position-absolute top-50 start-50 translate-middle'>
+        <div class='col'>
+          <form method='post' action='{% url "utilsapp:index" %}' enctype="multipart/form-data">
+              {% csrf_token %}
 
-            {{form.as_p}}
+              <select class="form-select" aria-label="Default select example">
+                <option value='neteller' selected>Neteller</option>
+              </select>
 
-            <button type='submit'>Отправить</button>
-        </form>
-    </div>
-    <div class='container'>
-      {% for file in file_list %}
-        <a href='{{file.file.url}}'>{{file.name}}</a>
-        </br>
-      {% endfor %}
+              <div class="mb-3 form-check mt-2">
+                <input type="checkbox" class="form-check-input" id="check1" name="is_deposit" checked required>
+                <label class="form-check-label" for="check1">Депозит</label>
+              </div>
+
+              <div class="mb-3">
+                <label for="pspFile" class="form-label">PSP File ...</label>
+                <input class="form-control" type="file" id="pspFile" name='psp_file' required>
+              </div>
+
+              <div class="mb-3">
+                <label for="dbFile" class="form-label">DB File ...</label>
+                <input class="form-control" type="file" id="dbFile" name='db_file' required>
+              </div>
+
+              <button type="submit" class="btn btn-primary">Отправить</button>
+          </form>
+        </div>
+        <div class='col mt-5'>
+          <div class='container'>
+            <div class='col'>
+              <div class='row'>
+                <p>Последние файлы:</p>
+              </div>
+              {% for file in file_list %}
+                <div class='row'>
+                  <div class='col'>
+                    <p>{{file.created}}</p>
+                  </div>
+                  <div class='col'>
+                    <a href='{{file.file.url}}'>{{file.name}}</a>
+                  </div>
+                </div>
+              {% endfor %}
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
 
     <!-- Optional JavaScript; choose one of the two! -->
