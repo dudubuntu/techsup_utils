@@ -13,6 +13,10 @@ class IndexView(ListView):
     template_name = 'utilsapp/index.html'
     queryset_name = 'file_list'
 
+    def get_queryset(self):
+        queryset = File.objects.all().order_by('-created')[:5]
+        return queryset
+
     def get_context_data(self, *args, **kwargs):
         context = super().get_context_data(*args, **kwargs)
         context['form'] = FilesForm
