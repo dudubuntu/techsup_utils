@@ -19,7 +19,7 @@ app.autodiscover_tasks()
 app.conf.beat_schedule = {
     'delete_files_30_sec': {
         'task': 'utilsapp.tasks.clear_files',
-        'schedule': 10.0
+        'schedule': 600.0
     },
 }
 

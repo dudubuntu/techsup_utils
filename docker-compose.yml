@@ -1,6 +1,78 @@
 services:
 
-    celery:
+    redis:
         image: redis
         ports:
             - "6379:6379"
+
+    celery_worker:
+        image: techsup_utils_web
+        command: celery -A utils worker -l info
+        container_name: celery_worker
+        volumes:
+            - ./:/usr/src/app/
+        depends_on:
+            - redis
+        links:
+            - redis
+
+    celery_beat:
+        image: techsup_utils_web
+        command: celery -A utils beat -l info
+        container_name: celery_beat
+        volumes:
+            - ./:/usr/src/app/
+        depends_on:
+            - redis
+        links:
+            - redis
+
+    flower:
+        image: mher/flower
+        command: flower --broker=redis://redis:6379/0 --port=5555
+        depends_on:
+            - redis
+            - celery_beat
+            - celery_worker
+        ports:
+            - "5555:5555"
+        links: 
+            - redis
+            - celery_beat
+            - celery_worker
+
+    web:
+        build:
+            context: ./
+            dockerfile: Dockerfile
+        command: ./entrypoint.sh
+        container_name: utils
+        volumes:
+            - ./:/usr/src/app
+        ports:
+            - "8000:8000"
+        depends_on:
+            - redis
+            - celery_beat
+            - celery_worker
+            - flower
+
+    nginx:
+        build:
+            context: ./Docker/nginx
+            dockerfile: Dockerfile
+        volumes:
+            - ./Docker/nginx/nginx.conf:/etc/nginx/conf.d/nginx.conf
+            - ./utils/static/:/static/
+            - ./utils/media/:/media/
+        links:
+            - flower
+            - web
+        ports:
+            - "80:80"
+        depends_on:
+            - redis
+            - celery_beat
+            - celery_worker
+            - flower
+            - web
