@@ -46,16 +46,20 @@
               <div class='row'>
                 <p>Последние файлы:</p>
               </div>
-              {% for file in file_list %}
-                <div class='row'>
-                  <div class='col'>
-                    <p>{{file.created}}</p>
+              {% if file_list|length < 1 %}
+                <p>...</p>
+              {% else %}
+                {% for file in file_list %}
+                  <div class='row'>
+                    <div class='col'>
+                      <p>{{file.created}}</p>
+                    </div>
+                    <div class='col'>
+                      <a href='{{file.file.url}}'>{{file.name}}</a>
+                    </div>
                   </div>
-                  <div class='col'>
-                    <a href='{{file.file.url}}'>{{file.name}}</a>
-                  </div>
-                </div>
-              {% endfor %}
+                {% endfor %}
+              {% endif %}
             </div>
           </div>
         </div>
