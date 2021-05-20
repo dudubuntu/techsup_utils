@@ -4,7 +4,9 @@ __pycache__
 db.sqlite3
 migrations/
 utils/media/*
+utils/static/*
 *.DS_Store*
+celerybeat-schedule
 celerybeat-schedule.db
 deposits_db.csv
 payouts_db.csv
