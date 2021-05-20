@@ -6,3 +6,6 @@ migrations/
 utils/media/*
 *.DS_Store*
 celerybeat-schedule.db
+deposits_db.csv
+payouts_db.csv
+transactions_1621265994644.csv
